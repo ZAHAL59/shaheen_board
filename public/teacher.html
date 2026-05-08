@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>SDA Teacher Whiteboard</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.production.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #09090b;
+      --surface: #111115;
+      --surface2: #18181d;
+      --border: #27272f;
+      --border2: #38384a;
+      --text: #f4f4f6;
+      --muted: #71717a;
+      --accent: #7c6df8;
+      --accent2: #9f94fb;
+      --green: #22c55e;
+      --red: #ef4444;
+      --amber: #f59e0b
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      z-index: 9999
+    }
+
+    .overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: .35;
+      pointer-events: none
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 120px;
+      background: var(--accent);
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .08;
+      pointer-events: none
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px
+    }
+
+    .logo-label {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text)
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+      letter-spacing: .04em
+    }
+
+    .card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.2
+    }
+
+    .card p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      line-height: 1.6
+    }
+
+    .field {
+      margin-bottom: 14px
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: .08em;
+      text-transform: uppercase
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .15s;
+      appearance: none
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124, 109, 248, .12)
+    }
+
+    .field input::placeholder {
+      color: #404048
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity .15s, transform .1s;
+      margin-top: 10px;
+      letter-spacing: .02em
+    }
+
+    .btn-primary:hover {
+      opacity: .88;
+      transform: translateY(-1px)
+    }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 10px;
+      min-height: 16px
+    }
+
+    #wbView {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      height: 58px;
+      min-height: 58px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      flex-shrink: 0
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      white-space: nowrap
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px
+    }
+
+    .sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      flex-shrink: 0
+    }
+
+    .teacher-badge {
+      background: transparent;
+      border: 1px solid var(--border2);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .pg-strip-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto
+    }
+
+    .pg-strip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow-x: auto;
+      max-width: 340px;
+      padding: 2px 0;
+      scrollbar-width: none
+    }
+
+    .pg-strip::-webkit-scrollbar {
+      display: none
+    }
+
+    .pg-thumb {
+      flex-shrink: 0;
+      min-width: 38px;
+      height: 34px;
+      padding: 0 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all .12s;
+      position: relative;
+      user-select: none
+    }
+
+    .pg-thumb:hover {
+      border-color: var(--accent);
+      color: var(--accent2)
+    }
+
+    .pg-thumb.active {
+      border-color: var(--accent);
+      background: rgba(124, 109, 248, .12);
+      color: var(--accent2)
+    }
+
+    .pg-thumb.filled::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green)
+    }
+
+    .icon-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .12s
+    }
+
+    .icon-btn:hover {
+      border-color: var(--border2);
+      color: var(--text)
+    }
+
+    .icon-btn:disabled {
+      opacity: .25;
+      cursor: default;
+      pointer-events: none
+    }
+
+    .add-pg-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      padding: 7px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      transition: all .12s
+    }
+
+    .add-pg-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent2)
+    }
+
+    .reset-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      padding: 7px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      transition: all .12s
+    }
+
+    .reset-btn:hover {
+      border-color: var(--amber);
+      color: var(--amber)
+    }
+
+    .pub-btn {
+      flex-shrink: 0;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+      transition: opacity .15s;
+      letter-spacing: .02em
+    }
+
+    .pub-btn:hover {
+      opacity: .85
+    }
+
+    .pub-btn:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+      pointer-events: none
+    }
+
+    .status {
+      flex-shrink: 0;
+      font-size: 11px;
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      white-space: nowrap;
+      transition: all .25s;
+      min-width: 58px;
+      text-align: center
+    }
+
+    .status.ok {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(34, 197, 94, .06)
+    }
+
+    .status.err {
+      border-color: var(--red);
+      color: var(--red);
+      background: rgba(239, 68, 68, .06)
+    }
+
+    .status.busy {
+      border-color: var(--accent);
+      color: var(--accent2);
+      background: rgba(124, 109, 248, .06)
+    }
+
+    #canvasWrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden
+    }
+
+    #excalidrawRoot {
+      position: absolute;
+      inset: 0
+    }
+
+    #blocker {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 9, 11, .55);
+      backdrop-filter: blur(2px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--muted);
+      gap: 10px
+    }
+
+    #blocker.on {
+      display: flex
+    }
+
+    #pageHud {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(17, 17, 21, .8);
+      border: 1px solid var(--border2);
+      backdrop-filter: blur(8px);
+      padding: 5px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      pointer-events: none;
+      z-index: 50;
+      white-space: nowrap
+    }
+
+    .spin {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: sp .7s linear infinite
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <div class="overlay" id="loginScreen">
+    <div class="card">
+      <div class="card-top">
+        <div class="logo-icon">✏️</div>
+        <div>
+          <div class="logo-label">SDA Whiteboard</div>
+          <div class="logo-sub">Teacher Portal</div>
+        </div>
+      </div>
+      <h2>Welcome back</h2>
+      <p>Sign in to start your whiteboard session</p>
+      <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username"></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password">
+      </div>
+      <button class="btn-primary" id="loginBtn">Sign In →</button>
+      <div class="error-msg" id="loginErr"></div>
+    </div>
+  </div>
+
+  <!-- BATCH -->
+  <div class="overlay" id="batchScreen" style="display:none">
+    <div class="card">
+      <div class="card-top">
+        <div class="logo-icon">📋</div>
+        <div>
+          <div class="logo-label">New Session</div>
+          <div class="logo-sub">Configure your whiteboard</div>
+        </div>
+      </div>
+      <h2>Start Session</h2>
+      <p>Choose a batch and give your notes a title before opening the board.</p>
+      <div class="field"><label>Batch</label><select id="batchSel"></select></div>
+      <div class="field">
+        <label>Note Title <span style="opacity:.4">(optional)</span></label>
+        <input type="text" id="noteTitle" placeholder="e.g. Chapter 3 – Algebra">
+      </div>
+      <button class="btn-primary" id="proceedBtn">Open Whiteboard →</button>
+      <div class="error-msg" id="batchErr"></div>
+    </div>
+  </div>
+
+  <!-- WHITEBOARD -->
+  <div id="wbView">
+    <div class="top-bar">
+      <div class="brand">
+        <div class="brand-icon">✏️</div>SDA
+      </div>
+      <div class="sep"></div>
+      <div class="teacher-badge" id="tbadge">Teacher</div>
+      <div class="sep"></div>
+      <div class="pg-strip-row">
+        <button class="icon-btn" id="btnPrev" title="Previous page">◀</button>
+        <div class="pg-strip" id="pgStrip"></div>
+        <button class="icon-btn" id="btnNext" title="Next page">▶</button>
+        <button class="add-pg-btn" id="btnAdd">＋ Page</button>
+      </div>
+      <div class="sep"></div>
+      <button class="reset-btn" id="btnReset" title="Snap view back to slide frame (R)">⊙ Reset View</button>
+      <div class="sep"></div>
+      <button class="pub-btn" id="pubBtn">↑ Publish</button>
+      <div class="status" id="statusEl">Ready</div>
+    </div>
+
+    <div id="canvasWrap">
+      <div id="excalidrawRoot"></div>
+      <div id="blocker">
+        <div class="spin"></div>Switching page…
+      </div>
+      <div id="pageHud">Page 1 of 1</div>
+    </div>
+  </div>
+
+  <script>
+    const FRAME_W = 1600, FRAME_H = 900, FRAME_ID = '__sda_frame__';
+    const CANVAS_BG = '#d0d0d8';
+    const CLAMP_MARGIN = 180;
+
+    let teacher = null, batchId = null, sessionTitle = '';
+    let pages = [{ elements: [], bgColor: '#ffffff' }];
+    let curPage = 0, exAPI = null, rRoot = null, locked = false, clampRAF = null;
+
+    const g = id => document.getElementById(id);
+    const v = id => g(id).value.trim();
+    const hide = id => { g(id).style.display = 'none'; };
+    const show = id => { g(id).style.display = 'flex'; };
+
+    async function post(url, body) {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      return r.json();
+    }
+    function blobToURL(blob) {
+      return new Promise((ok, fail) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = fail; r.readAsDataURL(blob); });
+    }
+    function imgDims(url) {
+      return new Promise(ok => { const img = new Image(); img.onload = () => ok({ w: img.naturalWidth, h: img.naturalHeight }); img.src = url; });
+    }
+
+    function makeFrame() {
+      return { id: FRAME_ID, type: 'rectangle', x: 0, y: 0, width: FRAME_W, height: FRAME_H, angle: 0, strokeColor: '#b0b0bc', backgroundColor: '#ffffff', fillStyle: 'solid', strokeWidth: 1, strokeStyle: 'solid', roughness: 0, opacity: 100, groupIds: [], frameId: null, roundness: null, seed: 42, version: 1, versionNonce: 42, isDeleted: false, boundElements: null, updated: 1, link: null, locked: true };
+    }
+    function withFrame(els) { return [makeFrame(), ...(els || []).filter(e => e.id !== FRAME_ID && !e.isDeleted)]; }
+    function withoutFrame(els) { return (els || []).filter(e => e.id !== FRAME_ID); }
+
+    function fitToView() {
+      if (!exAPI) return;
+      const wrap = g('canvasWrap'), vw = wrap.clientWidth, vh = wrap.clientHeight, PAD = 40;
+      const zoom = Math.min((vw - PAD * 2) / FRAME_W, (vh - PAD * 2) / FRAME_H, 1.6);
+      const scrollX = (vw - FRAME_W * zoom) / 2, scrollY = (vh - FRAME_H * zoom) / 2;
+      try { exAPI.updateScene({ appState: { zoom: { value: zoom }, scrollX, scrollY } }); } catch (e) { }
+    }
+
+    function clampLoop() {
+      if (!exAPI || locked) { clampRAF = requestAnimationFrame(clampLoop); return; }
+      try {
+        const as = exAPI.getAppState();
+        if (!as) { clampRAF = requestAnimationFrame(clampLoop); return; }
+        const z = as.zoom?.value ?? as.zoom ?? 1, sx = as.scrollX, sy = as.scrollY;
+        const wrap = g('canvasWrap'), vw = wrap.clientWidth, vh = wrap.clientHeight;
+        const frameR = sx + FRAME_W * z, frameB = sy + FRAME_H * z;
+        let nx = sx, ny = sy, snap = false;
+        if (frameR < CLAMP_MARGIN) { nx = CLAMP_MARGIN - FRAME_W * z; snap = true; }
+        if (sx > vw - CLAMP_MARGIN) { nx = vw - CLAMP_MARGIN; snap = true; }
+        if (frameB < CLAMP_MARGIN) { ny = CLAMP_MARGIN - FRAME_H * z; snap = true; }
+        if (sy > vh - CLAMP_MARGIN) { ny = vh - CLAMP_MARGIN; snap = true; }
+        if (snap) exAPI.updateScene({ appState: { scrollX: nx, scrollY: ny } });
+      } catch (e) { }
+      clampRAF = requestAnimationFrame(clampLoop);
+    }
+    function startClamp() { if (clampRAF) cancelAnimationFrame(clampRAF); clampRAF = requestAnimationFrame(clampLoop); }
+    function stopClamp() { if (clampRAF) { cancelAnimationFrame(clampRAF); clampRAF = null; } }
+
+    g('loginBtn').onclick = doLogin;
+    g('loginPass').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+
+    async function doLogin() {
+      const u = v('loginUser'), p = v('loginPass'), errEl = g('loginErr'); errEl.textContent = '';
+      try {
+        const d = await post('/api/teacher/login', { username: u, password: p });
+        if (!d.success) { errEl.textContent = 'Invalid credentials'; return; }
+        teacher = d.teacher;
+        const batches = await (await fetch(`/api/teacher/batches/${teacher.id}`)).json();
+        g('batchSel').innerHTML = batches.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+        hide('loginScreen'); show('batchScreen');
+      } catch { errEl.textContent = 'Server error – please try again'; }
+    }
+
+    g('proceedBtn').onclick = () => {
+      const sel = g('batchSel');
+      batchId = sel.value; sessionTitle = v('noteTitle');
+      if (!batchId) { g('batchErr').textContent = 'Please select a batch'; return; }
+      hide('batchScreen');
+      g('wbView').style.display = 'flex';
+      g('tbadge').textContent = `${teacher.name} · ${sel.options[sel.selectedIndex]?.text || batchId}`;
+      g('btnPrev').onclick = () => goPage(curPage - 1);
+      g('btnNext').onclick = () => goPage(curPage + 1);
+      g('btnAdd').onclick = addPage;
+      g('pubBtn').onclick = publish;
+      g('btnReset').onclick = fitToView;
+      initExcalidraw();
+    };
+
+    function initExcalidraw() {
+      const Exc = window.ExcalidrawLib?.Excalidraw;
+      if (!Exc) { alert('Excalidraw failed to load – please refresh.'); return; }
+      rRoot = ReactDOM.createRoot(g('excalidrawRoot'));
+      mountExcalidraw(); renderStrip(); updateNavBtns();
+    }
+
+    function mountExcalidraw() {
+      stopClamp();
+      const Exc = window.ExcalidrawLib.Excalidraw, pg = pages[curPage];
+      rRoot.render(React.createElement(Exc, {
+        key: `pg-${curPage}`,
+        initialData: {
+          elements: withFrame(pg.elements),
+          appState: { viewBackgroundColor: CANVAS_BG, theme: 'light', zoom: { value: 0.85 } },
+          scrollToContent: false,
+        },
+        excalidrawAPI: (api) => {
+          exAPI = api;
+          setTimeout(() => { fitToView(); setTimeout(startClamp, 300); }, 160);
+        },
+        onChange: (elements) => {
+          if (locked) return;
+          pages[curPage] = { elements: withoutFrame(elements), bgColor: '#ffffff' };
+          updateStripDot(curPage);
+        },
+        UIOptions: { canvasActions: { saveToActiveFile: false, loadScene: false, export: false } },
+        langCode: 'en',
+      }));
+      updateHud();
+    }
+
+    function snapshotNow() {
+      if (!exAPI) return;
+      try {
+        pages[curPage] = { elements: withoutFrame(exAPI.getSceneElements()), bgColor: '#ffffff' };
+      } catch (e) { console.warn('snapshot failed', e); }
+    }
+
+    function goPage(idx) {
+      if (locked || idx < 0 || idx >= pages.length || idx === curPage) return;
+      locked = true; setBlocker(true); snapshotNow();
+      curPage = idx; mountExcalidraw(); renderStrip(); updateNavBtns();
+      setTimeout(() => { locked = false; setBlocker(false); }, 400);
+    }
+
+    function addPage() {
+      if (locked) return;
+      locked = true; setBlocker(true); snapshotNow();
+      pages.push({ elements: [], bgColor: '#ffffff' });
+      curPage = pages.length - 1;
+      mountExcalidraw(); renderStrip(); updateNavBtns();
+      setTimeout(() => { g('pgStrip').scrollLeft = g('pgStrip').scrollWidth; locked = false; setBlocker(false); }, 400);
+    }
+
+    function renderStrip() {
+      const strip = g('pgStrip');
+      strip.innerHTML = pages.map((p, i) =>
+        `<div class="pg-thumb${i === curPage ? ' active' : ''}${p.elements.length > 0 ? ' filled' : ''}" data-i="${i}">${i + 1}</div>`
+      ).join('');
+      strip.querySelectorAll('.pg-thumb').forEach(el => el.onclick = () => goPage(+el.dataset.i));
+    }
+
+    function updateStripDot(idx) {
+      const el = document.querySelector(`#pgStrip [data-i="${idx}"]`);
+      if (el) el.classList.toggle('filled', pages[idx].elements.length > 0);
+    }
+    function updateNavBtns() { g('btnPrev').disabled = curPage === 0; g('btnNext').disabled = curPage === pages.length - 1; }
+    function updateHud() { g('pageHud').textContent = `Page ${curPage + 1} of ${pages.length}`; }
+    function setBlocker(on) { g('blocker').classList.toggle('on', on); }
+    function setStatus(msg, cls = '') {
+      const el = g('statusEl'); el.textContent = msg; el.className = 'status' + (cls ? ' ' + cls : '');
+      if (cls === 'ok' || cls === 'err') setTimeout(() => { el.textContent = 'Ready'; el.className = 'status'; }, 3500);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  EXPORT A SINGLE PAGE TO PNG DATA URL
+    //  FIX: exportBackground + viewBackgroundColor must be
+    //  TOP-LEVEL props on exportToBlob, NOT nested in appState.
+    // ════════════════════════════════════════════════════════════
+    async function exportPageToDataURL(pageIdx) {
+      const exportToBlob = window.ExcalidrawLib?.exportToBlob;
+      if (!exportToBlob) throw new Error('exportToBlob unavailable');
+
+      const pg = pages[pageIdx];
+      const exportEls = withFrame(pg.elements);
+      const allFiles = exAPI?.getFiles?.() ?? {};
+
+      // ✅ FIXED: top-level props, not inside appState
+      const blob = await exportToBlob({
+        elements: exportEls,
+        files: allFiles,
+        exportBackground: true,
+        viewBackgroundColor: '#ffffff',
+        exportWithDarkMode: false,
+        exportScale: 2,
+      });
+
+      // Crop/stamp onto exact 2× frame canvas so student always
+      // sees a clean 16:9 image with no grey padding
+      const rawURL = await blobToURL(blob);
+      const rawDims = await imgDims(rawURL);
+      const targetW = FRAME_W * 2, targetH = FRAME_H * 2;
+
+      const canvas = Object.assign(document.createElement('canvas'), { width: targetW, height: targetH });
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, targetW, targetH);
+
+      const img = await new Promise((res, rej) => {
+        const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = rawURL;
+      });
+
+      const scale = Math.min(targetW / rawDims.w, targetH / rawDims.h);
+      const dw = rawDims.w * scale, dh = rawDims.h * scale;
+      ctx.drawImage(img, (targetW - dw) / 2, (targetH - dh) / 2, dw, dh);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    async function publish() {
+      g('pubBtn').disabled = true;
+      try {
+        snapshotNow(); // ← captures last stroke before publish
+
+        const pngUrls = [], pageImages = [];
+
+        for (let i = 0; i < pages.length; i++) {
+          setStatus(`${i + 1}/${pages.length}…`, 'busy');
+          try {
+            const url = await exportPageToDataURL(i);
+            pngUrls.push(url);
+            pageImages.push(url.split(',')[1]);
+          } catch (ex) {
+            console.error(`Page ${i + 1} export error:`, ex);
+            const c = Object.assign(document.createElement('canvas'), { width: FRAME_W * 2, height: FRAME_H * 2 });
+            c.getContext('2d').fillStyle = '#fff';
+            c.getContext('2d').fillRect(0, 0, c.width, c.height);
+            const url = c.toDataURL('image/png');
+            pngUrls.push(url); pageImages.push(url.split(',')[1]);
+          }
+        }
+
+        setStatus('Building PDF…', 'busy');
+        const { jsPDF } = window.jspdf;
+        const PW = 297, PH = Math.round(PW * FRAME_H / FRAME_W), PAD = 8;
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [PW, PH] });
+
+        for (let i = 0; i < pngUrls.length; i++) {
+          if (i > 0) pdf.addPage([PW, PH], 'landscape');
+          const d = await imgDims(pngUrls[i]);
+          const scale = Math.min((PW - PAD * 2) / d.w, (PH - PAD * 2) / d.h);
+          const dw = d.w * scale, dh = d.h * scale;
+          pdf.setFillColor(255, 255, 255); pdf.rect(0, 0, PW, PH, 'F');
+          pdf.addImage(pngUrls[i], 'PNG', (PW - dw) / 2, (PH - dh) / 2, dw, dh);
+        }
+
+        setStatus('Uploading…', 'busy');
+        const result = await post('/api/notes/save', {
+          pdfBase64: pdf.output('datauristring').split(',')[1],
+          pageCount: pages.length,
+          teacherId: teacher.id, teacherName: teacher.name,
+          batchId, title: sessionTitle || `Notes – ${new Date().toLocaleString()}`,
+        });
+
+        if (result.success) {
+          setStatus(`✓ Published (${pages.length}p)`, 'ok');
+          setTimeout(() => {
+            if (confirm(`Published ${pages.length} page(s) to students!\nStart a new session?`))
+              location.reload();
+          }, 800);
+        } else { throw new Error('Server returned failure'); }
+      } catch (e) {
+        console.error('Publish error:', e);
+        setStatus('Failed', 'err');
+      } finally { g('pubBtn').disabled = false; }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!exAPI) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') goPage(curPage + 1);
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') goPage(curPage - 1);
+      if (e.key === 'r' || e.key === 'R') fitToView();
+    });
+  </script>
+</body>
+
+</html>

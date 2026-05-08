@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDA Student – My Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #09090b;
+      --surface: #111115;
+      --surface2: #18181d;
+      --border: #27272f;
+      --border2: #38384a;
+      --text: #f4f4f6;
+      --muted: #71717a;
+      --accent: #7c6df8;
+      --accent2: #9f94fb;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── LOGIN ─── */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .login-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.3;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 120px;
+      background: var(--accent);
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.07;
+      pointer-events: none;
+    }
+
+    .login-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-label {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+      letter-spacing: .04em;
+    }
+
+    .login-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .login-card .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .15s;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124, 109, 248, .12);
+    }
+
+    .field input::placeholder {
+      color: #404048;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity .15s, transform .1s;
+      margin-top: 10px;
+      letter-spacing: .02em;
+    }
+
+    .btn-primary:hover {
+      opacity: .88;
+      transform: translateY(-1px);
+    }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 10px;
+      min-height: 16px;
+    }
+
+    .demo-hint {
+      font-size: 11px;
+      color: #404048;
+      margin-top: 20px;
+      line-height: 1.8;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .topbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+    }
+
+    .topbar-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .welcome-chip {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .welcome-chip span {
+      color: var(--accent2);
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: all .12s;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    /* ─── MAIN ─── */
+    .main {
+      padding: 36px 28px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .section-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .note-count {
+      background: transparent;
+      border: 1px solid var(--border2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* ─── NOTES GRID ─── */
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      cursor: pointer;
+      transition: border-color .15s, transform .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .note-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .2s;
+    }
+
+    .note-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+    }
+
+    .note-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .note-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      margin-bottom: 16px;
+    }
+
+    .note-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .note-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-value {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    .tags-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .btn-view {
+      flex: 1;
+      padding: 8px 12px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity .15s;
+    }
+
+    .btn-view:hover {
+      opacity: .85;
+    }
+
+    .btn-download {
+      flex: 1;
+      padding: 8px 12px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all .12s;
+    }
+
+    .btn-download:hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    /* ─── PDF VIEWER MODAL ─── */
+    .pdf-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .88);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .pdf-modal-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .pdf-modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pdf-modal-download {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+      transition: opacity .15s;
+    }
+
+    .pdf-modal-download:hover {
+      opacity: .85;
+    }
+
+    .pdf-modal-close {
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .12s;
+      flex-shrink: 0;
+    }
+
+    .pdf-modal-close:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .pdf-modal-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: #1c1c20;
+    }
+
+    .pdf-viewer-scroll {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 16px;
+    }
+
+    .pdf-page-wrap {
+      width: 100%;
+      max-width: 900px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, .4);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pdf-page-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .pdf-page-label {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      background: rgba(0, 0, 0, .5);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .pdf-loading-msg {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 80px 40px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginView" class="login-wrap">
+    <div class="login-card">
+      <div class="login-top">
+        <div class="logo-icon">📚</div>
+        <div>
+          <div class="logo-label">SDA Notes</div>
+          <div class="logo-sub">Student Portal</div>
+        </div>
+      </div>
+      <h2>My Notes</h2>
+      <p class="sub">Sign in to access your class notes</p>
+      <div class="field"><label>Username</label><input type="text" id="username" placeholder="e.g. alice"></div>
+      <div class="field"><label>Password</label><input type="password" id="password" placeholder="Enter password"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+      <div class="error-msg" id="loginError"></div>
+      <p class="demo-hint">
+        Demo accounts: alice / alice123 &nbsp;·&nbsp; bob / bob123<br>
+        carol / carol123 &nbsp;·&nbsp; dave / dave123
+      </p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardView" class="hidden">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-icon">📚</div>SDA Notes
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-label">My Notes</div>
+      <div class="topbar-right">
+        <div class="welcome-chip">Welcome, <span id="studentName">—</span></div>
+        <button class="logout-btn" onclick="doLogout()">Sign out</button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="section-header">
+        <h2>Your Notes</h2>
+        <div class="note-count" id="noteCount">—</div>
+      </div>
+      <div class="notes-grid" id="notesGrid">
+        <div class="loading-state">
+          <div class="spinner" style="margin:0 auto 12px"></div><br>Loading your notes…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF VIEWER MODAL -->
+  <div id="pdfModal" class="pdf-modal-overlay hidden">
+    <div class="pdf-modal-header">
+      <div class="pdf-modal-title" id="pdfModalTitle">Loading…</div>
+      <button class="pdf-modal-download" onclick="downloadCurrentNote()">↓ Download PDF</button>
+      <button class="pdf-modal-close" onclick="closePdfModal()" title="Close">✕</button>
+    </div>
+    <div class="pdf-modal-body">
+      <div class="pdf-viewer-scroll" id="pdfViewerScroll">
+        <div class="pdf-loading-msg" id="pdfLoadingMsg">
+          <div class="spinner"></div>
+          <span>Loading notes…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStudent = null;
+    let currentViewNoteId = null;
+    let currentNoteTitle = '';
+
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errEl = document.getElementById('loginError');
+      errEl.textContent = '';
+      try {
+        const res = await fetch('/api/student/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentStudent = data.student;
+          document.getElementById('loginView').classList.add('hidden');
+          document.getElementById('dashboardView').classList.remove('hidden');
+          document.getElementById('studentName').textContent = currentStudent.name;
+          loadNotes();
+        } else { errEl.textContent = 'Invalid username or password'; }
+      } catch { errEl.textContent = 'Server error – please try again'; }
+    }
+
+    function doLogout() {
+      currentStudent = null;
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('loginView').classList.remove('hidden');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('loginError').textContent = '';
+    }
+
+    async function loadNotes() {
+      const grid = document.getElementById('notesGrid');
+      grid.innerHTML = `<div class="loading-state"><div class="spinner" style="margin:0 auto 12px"></div><br>Loading your notes…</div>`;
+      document.getElementById('noteCount').textContent = '…';
+      try {
+        const res = await fetch(`/api/notes/student/${currentStudent.id}`);
+        const notes = await res.json();
+        document.getElementById('noteCount').textContent = notes.length === 0 ? '0 notes' : `${notes.length} note${notes.length !== 1 ? 's' : ''}`;
+        if (notes.length === 0) {
+          grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3>No notes yet</h3><p>Your teacher hasn't published any notes for your batch yet.<br>Check back after your next class!</p></div>`;
+          return;
+        }
+        grid.innerHTML = notes.map(note => `
+        <div class="note-card">
+          <div class="note-icon">📄</div>
+          <div class="note-title">${escapeHtml(note.title)}</div>
+          <div class="note-meta">
+            <div class="meta-row"><span>📅</span><span class="meta-value">${formatDate(note.createdAt)}</span></div>
+          </div>
+          <div class="tags-row">
+            <span class="tag">👩‍🏫 ${escapeHtml(note.teacherName)}</span>
+            <span class="tag">📑 ${note.pageCount} page${note.pageCount !== 1 ? 's' : ''}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn-view" onclick="viewNote('${escapeAttr(note.id)}','${escapeAttr(note.title)}',${note.pageCount})">View</button>
+            <button class="btn-download" onclick="downloadNote('${escapeAttr(note.id)}')">↓ Download</button>
+          </div>
+        </div>`).join('');
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><h3>Couldn't load notes</h3><p>There was a problem connecting to the server.<br>Please try again in a moment.</p></div>`;
+        document.getElementById('noteCount').textContent = 'Error';
+      }
+    }
+
+    async function viewNote(noteId, title, pageCount) {
+      currentViewNoteId = noteId; currentNoteTitle = title;
+      document.getElementById('pdfModalTitle').textContent = title || 'Note';
+      document.getElementById('pdfModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const scroll = document.getElementById('pdfViewerScroll');
+      scroll.innerHTML = `<div class="pdf-loading-msg"><div class="spinner"></div><span>Loading pages…</span></div>`;
+      try {
+        const res = await fetch(`/api/notes/pages/${noteId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (Array.isArray(data.pages) && data.pages.length > 0) { renderImagePages(data.pages, scroll); return; }
+      } catch (e) { console.warn('pages endpoint failed, falling back to iframe', e); }
+      document.getElementById('pdfModal').querySelector('.pdf-modal-body').innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.src = `/api/notes/download/${noteId}`;
+      iframe.style.cssText = 'width:100%;height:100%;border:none;flex:1;';
+      iframe.title = title;
+      document.getElementById('pdfModal').querySelector('.pdf-modal-body').appendChild(iframe);
+    }
+
+    function renderImagePages(pages, container) {
+      container.innerHTML = '';
+      pages.forEach((pageData, idx) => {
+        const wrap = document.createElement('div'); wrap.className = 'pdf-page-wrap';
+        const img = document.createElement('img');
+        img.src = pageData.startsWith('data:') ? pageData : `data:image/png;base64,${pageData}`;
+        img.alt = `Page ${idx + 1}`; img.loading = 'lazy';
+        const label = document.createElement('div'); label.className = 'pdf-page-label';
+        label.textContent = `${idx + 1} / ${pages.length}`;
+        wrap.appendChild(img); wrap.appendChild(label); container.appendChild(wrap);
+      });
+    }
+
+    function closePdfModal() {
+      document.getElementById('pdfModal').classList.add('hidden');
+      const body = document.getElementById('pdfModal').querySelector('.pdf-modal-body');
+      body.innerHTML = `<div class="pdf-viewer-scroll" id="pdfViewerScroll"></div>`;
+      document.body.style.overflow = ''; currentViewNoteId = null;
+    }
+
+    function downloadCurrentNote() { if (currentViewNoteId) downloadNote(currentViewNoteId); }
+
+    function downloadNote(noteId) {
+      const a = Object.assign(document.createElement('a'), {
+        href: `/api/notes/download/${noteId}`, target: '_blank', rel: 'noopener'
+      });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('pdfModal').classList.contains('hidden')) closePdfModal();
+    });
+
+    function formatDate(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) +
+        ' · ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    }
+    function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+    function escapeAttr(str) { return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+  </script>
+</body>
+
+</html>
