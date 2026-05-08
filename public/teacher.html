@@ -215,6 +215,51 @@
       min-height: 16px
     }
 
+    /* Navigation Link */
+    .nav-link-container {
+      margin-bottom: 20px
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(124, 109, 248, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+
+    .nav-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 109, 248, 0.4);
+      background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%)
+    }
+
+    .nav-link:active {
+      transform: translateY(0)
+    }
+
+    .nav-icon {
+      font-size: 16px
+    }
+
+    .nav-arrow {
+      font-size: 14px;
+      margin-left: 4px;
+      transition: transform 0.3s ease
+    }
+
+    .nav-link:hover .nav-arrow {
+      transform: translateX(3px)
+    }
+
     #wbView {
       display: none;
       flex-direction: column;
@@ -551,6 +596,16 @@
           <div class="logo-sub">Teacher Portal</div>
         </div>
       </div>
+
+      <!-- Beautiful Navigation Link -->
+      <div class="nav-link-container">
+        <a href="/student" class="nav-link">
+          <span class="nav-icon">📚</span>
+          <span class="nav-text">Switch to Student Page</span>
+          <span class="nav-arrow">→</span>
+        </a>
+      </div>
+
       <h2>Welcome back</h2>
       <p>Sign in to start your whiteboard session</p>
       <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username"></div>

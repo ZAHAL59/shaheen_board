@@ -7,7 +7,6 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const PORT = 3001;
 
 // Middleware
 app.use(cors());
@@ -220,8 +219,8 @@ app.get('/', (req, res) => {
     `);
 });
 
+const PORT = process.env.PORT || 3001;
+
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-  console.log(`📝 Teacher: http://localhost:${PORT}/teacher`);
-  console.log(`📚 Student: http://localhost:${PORT}/student`);
+  console.log(`Server running on port ${PORT}`);
 });
