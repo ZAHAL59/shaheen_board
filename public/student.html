@@ -39,7 +39,6 @@
       min-height: 100vh;
     }
 
-    /* ─── LOGIN ─── */
     .login-wrap {
       min-height: 100vh;
       display: flex;
@@ -53,9 +52,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
       background-size: 48px 48px;
       opacity: 0.3;
     }
@@ -69,21 +66,6 @@
       max-width: 400px;
       position: relative;
       z-index: 1;
-    }
-
-    .login-card::before {
-      content: '';
-      position: absolute;
-      top: -60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 240px;
-      height: 120px;
-      background: var(--accent);
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.07;
-      pointer-events: none;
     }
 
     .login-top {
@@ -122,7 +104,6 @@
       font-family: 'Syne', sans-serif;
       font-size: 28px;
       font-weight: 700;
-      color: var(--text);
       margin-bottom: 6px;
     }
 
@@ -182,7 +163,6 @@
       font-family: 'Inter', sans-serif;
       transition: opacity .15s, transform .1s;
       margin-top: 10px;
-      letter-spacing: .02em;
     }
 
     .btn-primary:hover {
@@ -197,7 +177,6 @@
       min-height: 16px;
     }
 
-    /* Navigation Link */
     .nav-link-container {
       margin-bottom: 20px;
     }
@@ -221,21 +200,12 @@
     .nav-link:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(124, 109, 248, 0.4);
-      background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
-    }
-
-    .nav-link:active {
-      transform: translateY(0);
-    }
-
-    .nav-icon {
-      font-size: 16px;
     }
 
     .nav-arrow {
       font-size: 14px;
       margin-left: 4px;
-      transition: transform 0.3s ease;
+      transition: transform .3s;
     }
 
     .nav-link:hover .nav-arrow {
@@ -251,7 +221,6 @@
       padding-top: 16px;
     }
 
-    /* ─── TOPBAR ─── */
     .topbar {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -336,7 +305,6 @@
       color: var(--red);
     }
 
-    /* ─── MAIN ─── */
     .main {
       padding: 36px 28px;
       max-width: 1280px;
@@ -366,7 +334,6 @@
       color: var(--muted);
     }
 
-    /* ─── NOTES GRID ─── */
     .notes-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
@@ -378,7 +345,6 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 22px;
-      cursor: pointer;
       transition: border-color .15s, transform .2s;
       position: relative;
       overflow: hidden;
@@ -444,7 +410,6 @@
 
     .meta-value {
       color: #9ca3af;
-      font-weight: 400;
     }
 
     .tags-row {
@@ -475,7 +440,7 @@
 
     .btn-view {
       flex: 1;
-      padding: 8px 12px;
+      padding: 9px 12px;
       background: var(--accent);
       color: #fff;
       border: none;
@@ -484,7 +449,12 @@
       font-weight: 600;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
       transition: opacity .15s;
+      text-decoration: none;
     }
 
     .btn-view:hover {
@@ -493,7 +463,7 @@
 
     .btn-download {
       flex: 1;
-      padding: 8px 12px;
+      padding: 9px 12px;
       background: transparent;
       color: var(--muted);
       border: 1px solid var(--border2);
@@ -502,155 +472,17 @@
       font-weight: 500;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
       transition: all .12s;
+      text-decoration: none;
     }
 
     .btn-download:hover {
-      border-color: var(--accent);
-      color: var(--accent2);
-    }
-
-    /* ─── PDF VIEWER MODAL ─── */
-    .pdf-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .88);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .pdf-modal-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-shrink: 0;
-    }
-
-    .pdf-modal-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .pdf-modal-download {
-      background: var(--green);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      flex-shrink: 0;
-      transition: opacity .15s;
-    }
-
-    .pdf-modal-download:hover {
-      opacity: .85;
-    }
-
-    .pdf-modal-close {
-      background: transparent;
-      border: 1px solid var(--border2);
-      color: var(--muted);
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .12s;
-      flex-shrink: 0;
-    }
-
-    .pdf-modal-close:hover {
-      border-color: var(--red);
-      color: var(--red);
-    }
-
-    .pdf-modal-body {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      background: #1c1c20;
-    }
-
-    .pdf-viewer-scroll {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 24px 16px;
-    }
-
-    .pdf-page-wrap {
-      width: 100%;
-      max-width: 900px;
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: 0 2px 16px rgba(0, 0, 0, .4);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .pdf-page-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .pdf-page-label {
-      position: absolute;
-      bottom: 8px;
-      right: 12px;
-      background: rgba(0, 0, 0, .5);
-      color: #fff;
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-
-    .pdf-loading-msg {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .spinner {
-      width: 28px;
-      height: 28px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+      border-color: var(--green);
+      color: var(--green);
     }
 
     .empty-state {
@@ -687,6 +519,22 @@
       font-size: 14px;
     }
 
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .hidden {
       display: none !important;
     }
@@ -718,16 +566,13 @@
           <div class="logo-sub">Student Portal</div>
         </div>
       </div>
-
-      <!-- Beautiful Navigation Link -->
       <div class="nav-link-container">
         <a href="/teacher" class="nav-link">
-          <span class="nav-icon">✏️</span>
-          <span class="nav-text">Switch to Teacher Page</span>
+          <span>✏️</span>
+          <span>Switch to Teacher Page</span>
           <span class="nav-arrow">→</span>
         </a>
       </div>
-
       <h2>My Notes</h2>
       <p class="sub">Sign in to access your class notes</p>
       <div class="field"><label>Username</label><input type="text" id="username" placeholder="e.g. alice"></div>
@@ -761,24 +606,7 @@
       </div>
       <div class="notes-grid" id="notesGrid">
         <div class="loading-state">
-          <div class="spinner" style="margin:0 auto 12px"></div><br>Loading your notes…
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PDF VIEWER MODAL -->
-  <div id="pdfModal" class="pdf-modal-overlay hidden">
-    <div class="pdf-modal-header">
-      <div class="pdf-modal-title" id="pdfModalTitle">Loading…</div>
-      <button class="pdf-modal-download" onclick="downloadCurrentNote()">↓ Download PDF</button>
-      <button class="pdf-modal-close" onclick="closePdfModal()" title="Close">✕</button>
-    </div>
-    <div class="pdf-modal-body">
-      <div class="pdf-viewer-scroll" id="pdfViewerScroll">
-        <div class="pdf-loading-msg" id="pdfLoadingMsg">
-          <div class="spinner"></div>
-          <span>Loading notes…</span>
+          <div class="spinner"></div>Loading your notes…
         </div>
       </div>
     </div>
@@ -786,10 +614,10 @@
 
   <script>
     let currentStudent = null;
-    let currentViewNoteId = null;
-    let currentNoteTitle = '';
 
-    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
 
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
@@ -808,8 +636,12 @@
           document.getElementById('dashboardView').classList.remove('hidden');
           document.getElementById('studentName').textContent = currentStudent.name;
           loadNotes();
-        } else { errEl.textContent = 'Invalid username or password'; }
-      } catch { errEl.textContent = 'Server error – please try again'; }
+        } else {
+          errEl.textContent = 'Invalid username or password';
+        }
+      } catch {
+        errEl.textContent = 'Server error – please try again';
+      }
     }
 
     function doLogout() {
@@ -823,100 +655,51 @@
 
     async function loadNotes() {
       const grid = document.getElementById('notesGrid');
-      grid.innerHTML = `<div class="loading-state"><div class="spinner" style="margin:0 auto 12px"></div><br>Loading your notes…</div>`;
+      grid.innerHTML = '<div class="loading-state"><div class="spinner"></div>Loading your notes…</div>';
       document.getElementById('noteCount').textContent = '…';
       try {
-        const res = await fetch(`/api/notes/student/${currentStudent.id}`);
+        const res = await fetch('/api/notes/student/' + currentStudent.id);
         const notes = await res.json();
-        document.getElementById('noteCount').textContent = notes.length === 0 ? '0 notes' : `${notes.length} note${notes.length !== 1 ? 's' : ''}`;
+        document.getElementById('noteCount').textContent =
+          notes.length === 0 ? '0 notes' : notes.length + ' note' + (notes.length !== 1 ? 's' : '');
+
         if (notes.length === 0) {
-          grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3>No notes yet</h3><p>Your teacher hasn't published any notes for your batch yet.<br>Check back after your next class!</p></div>`;
+          grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><h3>No notes yet</h3><p>Your teacher hasn\'t published any notes for your batch yet.<br>Check back after your next class!</p></div>';
           return;
         }
-        grid.innerHTML = notes.map(note => `
-        <div class="note-card">
-          <div class="note-icon">📄</div>
-          <div class="note-title">${escapeHtml(note.title)}</div>
-          <div class="note-meta">
-            <div class="meta-row"><span>📅</span><span class="meta-value">${formatDate(note.createdAt)}</span></div>
-          </div>
-          <div class="tags-row">
-            <span class="tag">👩‍🏫 ${escapeHtml(note.teacherName)}</span>
-            <span class="tag">📑 ${note.pageCount} page${note.pageCount !== 1 ? 's' : ''}</span>
-          </div>
-          <div class="card-actions">
-            <button class="btn-view" onclick="viewNote('${escapeAttr(note.id)}','${escapeAttr(note.title)}',${note.pageCount})">View</button>
-            <button class="btn-download" onclick="downloadNote('${escapeAttr(note.id)}')">↓ Download</button>
-          </div>
-        </div>`).join('');
+
+        grid.innerHTML = notes.map(function (note) {
+          var viewUrl = '/api/notes/download/' + note.id;
+          var downloadUrl = '/api/notes/download/' + note.id + '?download=true';
+          return '<div class="note-card">' +
+            '<div class="note-icon">📄</div>' +
+            '<div class="note-title">' + escapeHtml(note.title) + '</div>' +
+            '<div class="note-meta"><div class="meta-row"><span>📅</span><span class="meta-value">' + formatDate(note.createdAt) + '</span></div></div>' +
+            '<div class="tags-row"><span class="tag">👩‍🏫 ' + escapeHtml(note.teacherName) + '</span><span class="tag">📑 ' + note.pageCount + ' page' + (note.pageCount !== 1 ? 's' : '') + '</span></div>' +
+            '<div class="card-actions">' +
+            '<a class="btn-view" href="' + viewUrl + '" target="_blank" rel="noopener">👁 View PDF</a>' +
+            '<a class="btn-download" href="' + downloadUrl + '" download>↓ Download</a>' +
+            '</div>' +
+            '</div>';
+        }).join('');
       } catch (err) {
         console.error(err);
-        grid.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><h3>Couldn't load notes</h3><p>There was a problem connecting to the server.<br>Please try again in a moment.</p></div>`;
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><h3>Couldn\'t load notes</h3><p>There was a problem connecting to the server.<br>Please try again in a moment.</p></div>';
         document.getElementById('noteCount').textContent = 'Error';
       }
     }
 
-    async function viewNote(noteId, title, pageCount) {
-      currentViewNoteId = noteId; currentNoteTitle = title;
-      document.getElementById('pdfModalTitle').textContent = title || 'Note';
-      document.getElementById('pdfModal').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      const scroll = document.getElementById('pdfViewerScroll');
-      scroll.innerHTML = `<div class="pdf-loading-msg"><div class="spinner"></div><span>Loading pages…</span></div>`;
-      try {
-        const res = await fetch(`/api/notes/pages/${noteId}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (Array.isArray(data.pages) && data.pages.length > 0) { renderImagePages(data.pages, scroll); return; }
-      } catch (e) { console.warn('pages endpoint failed, falling back to iframe', e); }
-      document.getElementById('pdfModal').querySelector('.pdf-modal-body').innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.src = `/api/notes/download/${noteId}`;
-      iframe.style.cssText = 'width:100%;height:100%;border:none;flex:1;';
-      iframe.title = title;
-      document.getElementById('pdfModal').querySelector('.pdf-modal-body').appendChild(iframe);
-    }
-
-    function renderImagePages(pages, container) {
-      container.innerHTML = '';
-      pages.forEach((pageData, idx) => {
-        const wrap = document.createElement('div'); wrap.className = 'pdf-page-wrap';
-        const img = document.createElement('img');
-        img.src = pageData.startsWith('data:') ? pageData : `data:image/png;base64,${pageData}`;
-        img.alt = `Page ${idx + 1}`; img.loading = 'lazy';
-        const label = document.createElement('div'); label.className = 'pdf-page-label';
-        label.textContent = `${idx + 1} / ${pages.length}`;
-        wrap.appendChild(img); wrap.appendChild(label); container.appendChild(wrap);
-      });
-    }
-
-    function closePdfModal() {
-      document.getElementById('pdfModal').classList.add('hidden');
-      const body = document.getElementById('pdfModal').querySelector('.pdf-modal-body');
-      body.innerHTML = `<div class="pdf-viewer-scroll" id="pdfViewerScroll"></div>`;
-      document.body.style.overflow = ''; currentViewNoteId = null;
-    }
-
-    function downloadCurrentNote() { if (currentViewNoteId) downloadNote(currentViewNoteId); }
-
-    function downloadNote(noteId) {
-      const a = Object.assign(document.createElement('a'), {
-        href: `/api/notes/download/${noteId}`, target: '_blank', rel: 'noopener'
-      });
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !document.getElementById('pdfModal').classList.contains('hidden')) closePdfModal();
-    });
-
     function formatDate(ts) {
-      const d = new Date(ts);
+      var d = new Date(ts);
       return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) +
         ' · ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     }
-    function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
-    function escapeAttr(str) { return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+    function escapeHtml(str) {
+      var d = document.createElement('div');
+      d.textContent = str || '';
+      return d.innerHTML;
+    }
   </script>
 </body>
 

@@ -215,7 +215,6 @@
       min-height: 16px
     }
 
-    /* Navigation Link */
     .nav-link-container {
       margin-bottom: 20px
     }
@@ -596,8 +595,6 @@
           <div class="logo-sub">Teacher Portal</div>
         </div>
       </div>
-
-      <!-- Beautiful Navigation Link -->
       <div class="nav-link-container">
         <a href="/student" class="nav-link">
           <span class="nav-icon">📚</span>
@@ -605,7 +602,6 @@
           <span class="nav-arrow">→</span>
         </a>
       </div>
-
       <h2>Welcome back</h2>
       <p>Sign in to start your whiteboard session</p>
       <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username"></div>
@@ -672,6 +668,10 @@
   <script>
     const FRAME_W = 1600, FRAME_H = 900, FRAME_ID = '__sda_frame__';
     const CANVAS_BG = '#d0d0d8';
+
+    // ── Default frame background (white). Tracks the current chosen bg colour.
+    let frameBgColor = '#ffffff';
+
     const CLAMP_MARGIN = 180;
 
     let teacher = null, batchId = null, sessionTitle = '';
@@ -694,16 +694,98 @@
       return new Promise(ok => { const img = new Image(); img.onload = () => ok({ w: img.naturalWidth, h: img.naturalHeight }); img.src = url; });
     }
 
-    function makeFrame() {
-      return { id: FRAME_ID, type: 'rectangle', x: 0, y: 0, width: FRAME_W, height: FRAME_H, angle: 0, strokeColor: '#b0b0bc', backgroundColor: '#ffffff', fillStyle: 'solid', strokeWidth: 1, strokeStyle: 'solid', roughness: 0, opacity: 100, groupIds: [], frameId: null, roundness: null, seed: 42, version: 1, versionNonce: 42, isDeleted: false, boundElements: null, updated: 1, link: null, locked: true };
+    // ════════════════════════════════════════════════════════════
+    //  FRAME HELPERS
+    //  FIX 1 – Frame background now uses `frameBgColor` (not
+    //           hardcoded '#ffffff') so changing the canvas/page
+    //           colour actually reflects inside the frame.
+    //  FIX 2 – Frame is pinned to x:0, y:0 and locked:true.
+    //           On every onChange we detect if the frame has
+    //           drifted and force it back with updateScene().
+    // ════════════════════════════════════════════════════════════
+    function makeFrame(bgColor) {
+      return {
+        id: FRAME_ID,
+        type: 'rectangle',
+        x: 0, y: 0,
+        width: FRAME_W, height: FRAME_H,
+        angle: 0,
+        strokeColor: '#b0b0bc',        // visible border on teacher canvas
+        backgroundColor: bgColor || frameBgColor,
+        fillStyle: 'solid',
+        strokeWidth: 1,
+        strokeStyle: 'solid',
+        roughness: 0,
+        opacity: 100,
+        groupIds: [],
+        frameId: null,
+        roundness: null,
+        seed: 42,
+        version: 1,
+        versionNonce: 42,
+        isDeleted: false,
+        boundElements: null,
+        updated: 1,
+        link: null,
+        locked: true,
+      };
     }
-    function withFrame(els) { return [makeFrame(), ...(els || []).filter(e => e.id !== FRAME_ID && !e.isDeleted)]; }
-    function withoutFrame(els) { return (els || []).filter(e => e.id !== FRAME_ID); }
+
+    function withFrame(els, bgColor) {
+      return [makeFrame(bgColor), ...(els || []).filter(e => e.id !== FRAME_ID && !e.isDeleted)];
+    }
+    function withoutFrame(els) {
+      return (els || []).filter(e => e.id !== FRAME_ID);
+    }
+
+    // Detects if the frame element was dragged / mutated and re-pins it.
+    function enforceFramePosition(elements) {
+      const frame = elements.find(e => e.id === FRAME_ID);
+      if (!frame) return false;                          // frame missing → caller should re-inject
+      if (frame.x !== 0 || frame.y !== 0 ||
+        frame.width !== FRAME_W || frame.height !== FRAME_H ||
+        frame.backgroundColor !== frameBgColor) {
+        return true;                                     // needs correction
+      }
+      return false;
+    }
+
+    let frameGuardInterval = null;
+
+    // Continuously deselect the frame if it ever gets selected,
+    // and snap it back if it drifted. Runs every 80ms.
+    function startFrameGuard() {
+      if (frameGuardInterval) clearInterval(frameGuardInterval);
+      frameGuardInterval = setInterval(() => {
+        if (!exAPI || locked) return;
+        try {
+          const as = exAPI.getAppState();
+          // Deselect frame if selected
+          if (as?.selectedElementIds?.[FRAME_ID]) {
+            const newSelected = { ...as.selectedElementIds };
+            delete newSelected[FRAME_ID];
+            exAPI.updateScene({ appState: { selectedElementIds: newSelected } });
+          }
+          // Snap frame position if drifted
+          const els = exAPI.getSceneElements();
+          if (enforceFramePosition(els)) {
+            const userEls = withoutFrame(els);
+            exAPI.updateScene({ elements: withFrame(userEls, frameBgColor) });
+          }
+        } catch (e) { }
+      }, 80);
+    }
+    function stopFrameGuard() {
+      if (frameGuardInterval) { clearInterval(frameGuardInterval); frameGuardInterval = null; }
+    }
+
+    let fixedZoom = 0.85; // updated when fitToView runs
 
     function fitToView() {
       if (!exAPI) return;
       const wrap = g('canvasWrap'), vw = wrap.clientWidth, vh = wrap.clientHeight, PAD = 40;
       const zoom = Math.min((vw - PAD * 2) / FRAME_W, (vh - PAD * 2) / FRAME_H, 1.6);
+      fixedZoom = zoom;
       const scrollX = (vw - FRAME_W * zoom) / 2, scrollY = (vh - FRAME_H * zoom) / 2;
       try { exAPI.updateScene({ appState: { zoom: { value: zoom }, scrollX, scrollY } }); } catch (e) { }
     }
@@ -715,6 +797,14 @@
         if (!as) { clampRAF = requestAnimationFrame(clampLoop); return; }
         const z = as.zoom?.value ?? as.zoom ?? 1, sx = as.scrollX, sy = as.scrollY;
         const wrap = g('canvasWrap'), vw = wrap.clientWidth, vh = wrap.clientHeight;
+
+        // ── Lock zoom: if user pinched/scrolled to zoom, snap back
+        if (Math.abs(z - fixedZoom) > 0.001) {
+          exAPI.updateScene({ appState: { zoom: { value: fixedZoom }, scrollX: (vw - FRAME_W * fixedZoom) / 2, scrollY: (vh - FRAME_H * fixedZoom) / 2 } });
+          clampRAF = requestAnimationFrame(clampLoop);
+          return;
+        }
+
         const frameR = sx + FRAME_W * z, frameB = sy + FRAME_H * z;
         let nx = sx, ny = sy, snap = false;
         if (frameR < CLAMP_MARGIN) { nx = CLAMP_MARGIN - FRAME_W * z; snap = true; }
@@ -725,8 +815,8 @@
       } catch (e) { }
       clampRAF = requestAnimationFrame(clampLoop);
     }
-    function startClamp() { if (clampRAF) cancelAnimationFrame(clampRAF); clampRAF = requestAnimationFrame(clampLoop); }
-    function stopClamp() { if (clampRAF) { cancelAnimationFrame(clampRAF); clampRAF = null; } }
+    function startClamp() { if (clampRAF) cancelAnimationFrame(clampRAF); clampRAF = requestAnimationFrame(clampLoop); startFrameGuard(); }
+    function stopClamp() { if (clampRAF) { cancelAnimationFrame(clampRAF); clampRAF = null; } stopFrameGuard(); }
 
     g('loginBtn').onclick = doLogin;
     g('loginPass').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
@@ -762,28 +852,108 @@
       const Exc = window.ExcalidrawLib?.Excalidraw;
       if (!Exc) { alert('Excalidraw failed to load – please refresh.'); return; }
       rRoot = ReactDOM.createRoot(g('excalidrawRoot'));
+
+      // Block ctrl+wheel (zoom gesture) and pinch zoom before they reach Excalidraw
+      g('canvasWrap').addEventListener('wheel', e => {
+        if (e.ctrlKey || e.metaKey) e.preventDefault();
+      }, { passive: false });
+
       mountExcalidraw(); renderStrip(); updateNavBtns();
     }
 
     function mountExcalidraw() {
       stopClamp();
-      const Exc = window.ExcalidrawLib.Excalidraw, pg = pages[curPage];
+      const Exc = window.ExcalidrawLib.Excalidraw;
+      const pg = pages[curPage];
+
+      // Restore per-page bg colour when switching pages
+      frameBgColor = pg.bgColor || '#ffffff';
+
       rRoot.render(React.createElement(Exc, {
         key: `pg-${curPage}`,
         initialData: {
-          elements: withFrame(pg.elements),
-          appState: { viewBackgroundColor: CANVAS_BG, theme: 'light', zoom: { value: 0.85 } },
+          elements: withFrame(pg.elements, frameBgColor),
+          appState: {
+            viewBackgroundColor: CANVAS_BG,
+            theme: 'light',
+            zoom: { value: 0.85 },
+          },
           scrollToContent: false,
         },
         excalidrawAPI: (api) => {
           exAPI = api;
           setTimeout(() => { fitToView(); setTimeout(startClamp, 300); }, 160);
         },
-        onChange: (elements) => {
+
+        // Intercept pointer events — if user clicks the frame, immediately
+        // deselect it so it can never enter a "selected/movable" state.
+        onPointerDown: (activeTool, pointerDownState) => {
+          if (!exAPI) return;
+          try {
+            const hit = pointerDownState?.hit?.element;
+            if (hit?.id === FRAME_ID) {
+              // Defer one tick so Excalidraw has processed its own selection,
+              // then immediately clear it.
+              setTimeout(() => {
+                try {
+                  const as = exAPI.getAppState();
+                  if (as?.selectedElementIds?.[FRAME_ID]) {
+                    const sel = { ...as.selectedElementIds };
+                    delete sel[FRAME_ID];
+                    exAPI.updateScene({ appState: { selectedElementIds: sel } });
+                  }
+                } catch (e) { }
+              }, 0);
+            }
+          } catch (e) { }
+        },
+
+        // ════════════════════════════════════════════════════════
+        //  onChange – two fixes applied here:
+        //
+        //  FIX 1 (bg colour): Excalidraw's background-colour
+        //  picker changes `appState.viewBackgroundColor`, NOT the
+        //  frame element. We intercept that value and sync it to
+        //  `frameBgColor`, then re-inject the frame with the new
+        //  colour so it visually updates inside the rectangle.
+        //
+        //  FIX 2 (immovable frame): If the frame element has
+        //  been moved/resized by the user (locked:true stops
+        //  editing in most cases but not all pointer events in
+        //  0.17.x), we immediately call updateScene to snap it
+        //  back to {x:0, y:0} with the correct dimensions.
+        // ════════════════════════════════════════════════════════
+        onChange: (elements, appState) => {
           if (locked) return;
-          pages[curPage] = { elements: withoutFrame(elements), bgColor: '#ffffff' };
+
+          // ── FIX 1: sync background colour from appState → frame
+          const newBg = appState?.viewBackgroundColor;
+          if (newBg && newBg !== frameBgColor) {
+            frameBgColor = newBg;
+            pages[curPage].bgColor = newBg;
+            // Re-inject frame with new colour (non-recursive:
+            // the next onChange will see matching colours and skip)
+            try {
+              const currentEls = withoutFrame(exAPI.getSceneElements());
+              exAPI.updateScene({ elements: withFrame(currentEls, frameBgColor) });
+            } catch (e) { }
+            updateStripDot(curPage);
+            return; // skip double-save this tick
+          }
+
+          // ── FIX 2: detect & snap any frame drift
+          const userEls = withoutFrame(elements);
+          if (enforceFramePosition(elements)) {
+            // Frame was moved — snap it back silently
+            try {
+              exAPI.updateScene({ elements: withFrame(userEls, frameBgColor) });
+            } catch (e) { }
+          }
+
+          pages[curPage] = { elements: userEls, bgColor: frameBgColor };
           updateStripDot(curPage);
         },
+
         UIOptions: { canvasActions: { saveToActiveFile: false, loadScene: false, export: false } },
         langCode: 'en',
       }));
@@ -793,7 +963,10 @@
     function snapshotNow() {
       if (!exAPI) return;
       try {
-        pages[curPage] = { elements: withoutFrame(exAPI.getSceneElements()), bgColor: '#ffffff' };
+        pages[curPage] = {
+          elements: withoutFrame(exAPI.getSceneElements()),
+          bgColor: frameBgColor,
+        };
       } catch (e) { console.warn('snapshot failed', e); }
     }
 
@@ -834,46 +1007,64 @@
     }
 
     // ════════════════════════════════════════════════════════════
-    //  EXPORT A SINGLE PAGE TO PNG DATA URL
-    //  FIX: exportBackground + viewBackgroundColor must be
-    //  TOP-LEVEL props on exportToBlob, NOT nested in appState.
+    //  EXPORT – uses per-page bgColor for the frame fill so the
+    //  exported PNG correctly reflects the chosen background.
     // ════════════════════════════════════════════════════════════
     async function exportPageToDataURL(pageIdx) {
       const exportToBlob = window.ExcalidrawLib?.exportToBlob;
       if (!exportToBlob) throw new Error('exportToBlob unavailable');
 
       const pg = pages[pageIdx];
-      const exportEls = withFrame(pg.elements);
+      const pageBg = pg.bgColor || '#ffffff';
       const allFiles = exAPI?.getFiles?.() ?? {};
+      const userEls = withoutFrame(pg.elements);
+      const SCALE = 2;
+      const targetW = FRAME_W * SCALE, targetH = FRAME_H * SCALE;
 
-      // ✅ FIXED: top-level props, not inside appState
+      // Build the final canvas: solid bg fill + user drawings composited on top.
+      // We export user elements only (no frame rect → no border artifact).
+      // A hidden anchor rectangle at frame origin/size forces exportToBlob to
+      // use exactly the frame region as the bounding box.
+      const anchor = {
+        id: '__sda_anchor__', type: 'rectangle',
+        x: 0, y: 0, width: FRAME_W, height: FRAME_H,
+        angle: 0,
+        strokeColor: pageBg,        // same as bg → invisible
+        backgroundColor: pageBg,   // same as bg → invisible
+        fillStyle: 'solid', strokeWidth: 1, strokeStyle: 'solid',
+        roughness: 0, opacity: 100,
+        groupIds: [], frameId: null, roundness: null,
+        seed: 99, version: 1, versionNonce: 99,
+        isDeleted: false, boundElements: null, updated: 1, link: null, locked: true,
+      };
+
       const blob = await exportToBlob({
-        elements: exportEls,
+        elements: [anchor, ...userEls],
         files: allFiles,
         exportBackground: true,
-        viewBackgroundColor: '#ffffff',
+        viewBackgroundColor: pageBg,
         exportWithDarkMode: false,
-        exportScale: 2,
+        exportScale: SCALE,
       });
 
-      // Crop/stamp onto exact 2× frame canvas so student always
-      // sees a clean 16:9 image with no grey padding
       const rawURL = await blobToURL(blob);
       const rawDims = await imgDims(rawURL);
-      const targetW = FRAME_W * 2, targetH = FRAME_H * 2;
 
+      // Compose final canvas: bg fill first, then drawing scaled to fill exactly
       const canvas = Object.assign(document.createElement('canvas'), { width: targetW, height: targetH });
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = pageBg;
       ctx.fillRect(0, 0, targetW, targetH);
 
       const img = await new Promise((res, rej) => {
         const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = rawURL;
       });
 
-      const scale = Math.min(targetW / rawDims.w, targetH / rawDims.h);
+      // Scale so the exported image fills the canvas exactly — no grey strips
+      const scale = Math.max(targetW / rawDims.w, targetH / rawDims.h);
       const dw = rawDims.w * scale, dh = rawDims.h * scale;
-      ctx.drawImage(img, (targetW - dw) / 2, (targetH - dh) / 2, dw, dh);
+      const ox = (targetW - dw) / 2, oy = (targetH - dh) / 2;
+      ctx.drawImage(img, ox, oy, dw, dh);
 
       return canvas.toDataURL('image/png');
     }
@@ -881,7 +1072,7 @@
     async function publish() {
       g('pubBtn').disabled = true;
       try {
-        snapshotNow(); // ← captures last stroke before publish
+        snapshotNow();
 
         const pngUrls = [], pageImages = [];
 
@@ -903,16 +1094,17 @@
 
         setStatus('Building PDF…', 'busy');
         const { jsPDF } = window.jspdf;
-        const PW = 297, PH = Math.round(PW * FRAME_H / FRAME_W), PAD = 8;
+        const PW = 297, PH = Math.round(PW * FRAME_H / FRAME_W);
         const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [PW, PH] });
 
         for (let i = 0; i < pngUrls.length; i++) {
           if (i > 0) pdf.addPage([PW, PH], 'landscape');
-          const d = await imgDims(pngUrls[i]);
-          const scale = Math.min((PW - PAD * 2) / d.w, (PH - PAD * 2) / d.h);
-          const dw = d.w * scale, dh = d.h * scale;
-          pdf.setFillColor(255, 255, 255); pdf.rect(0, 0, PW, PH, 'F');
-          pdf.addImage(pngUrls[i], 'PNG', (PW - dw) / 2, (PH - dh) / 2, dw, dh);
+          // Fill page with the page bg colour first
+          const pgBg = pages[i]?.bgColor || '#ffffff';
+          const r = parseInt(pgBg.slice(1, 3), 16), gg = parseInt(pgBg.slice(3, 5), 16), b = parseInt(pgBg.slice(5, 7), 16);
+          pdf.setFillColor(r, gg, b); pdf.rect(0, 0, PW, PH, 'F');
+          // Image fills the entire page — no padding, no border strips
+          pdf.addImage(pngUrls[i], 'PNG', 0, 0, PW, PH);
         }
 
         setStatus('Uploading…', 'busy');

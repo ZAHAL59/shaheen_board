@@ -187,9 +187,10 @@ app.get('/api/notes/teacher/:teacherId', (req, res) => {
   res.json(teacherNotes);
 });
 
-// Download PDF
+// View/Download PDF
 app.get('/api/notes/download/:noteId', (req, res) => {
   const { noteId } = req.params;
+  const { download } = req.query;
   const notes = readNotes();
   const note = notes.find(n => n.id === noteId);
   if (!note) return res.status(404).json({ error: 'Note not found' });
@@ -197,7 +198,20 @@ app.get('/api/notes/download/:noteId', (req, res) => {
   const filepath = path.join(uploadsDir, note.filename);
   if (!fs.existsSync(filepath)) return res.status(404).json({ error: 'File not found' });
 
-  res.download(filepath, `${note.title}.pdf`);
+  // Sanitize filename to avoid header injection
+  const safeFilename = (note.title || 'note').replace(/[^\w\s.-]/g, '').trim() + '.pdf';
+
+  if (download === 'true') {
+    // Force download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=' + safeFilename);
+    res.sendFile(filepath);
+  } else {
+    // Display inline
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=' + safeFilename);
+    res.sendFile(filepath);
+  }
 });
 
 // Serve frontend pages
