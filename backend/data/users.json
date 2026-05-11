@@ -32,27 +32,35 @@
     },
     {
       "id": "student2",
-      "username": "bob",
-      "password": "bob123",
-      "name": "Bob Smith",
+      "username": "zahal",
+      "password": "zahal123",
+      "name": "zahal",
       "batch": "batch1",
-      "email": "bob@example.com"
+      "email": "zahal@example.com"
     },
     {
       "id": "student3",
-      "username": "carol",
-      "password": "carol123",
-      "name": "Carol Davis",
+      "username": "shalima",
+      "password": "shalima123",
+      "name": "shalima",
       "batch": "batch1",
-      "email": "carol@example.com"
+      "email": "shalima@example.com"
     },
     {
       "id": "student4",
-      "username": "dave",
-      "password": "dave123",
-      "name": "Dave Wilson",
+      "username": "zeba",
+      "password": "zeba123",
+      "name": "zeba",
+      "batch": "batch1",
+      "email": "zeba@example.com"
+    },
+    {
+      "id": "student5",
+      "username": "roshni",
+      "password": "roshni123",
+      "name": "Roshni Patel",
       "batch": "batch2",
-      "email": "dave@example.com"
+      "email": "roshni@example.com"
     },
     {
       "id": "student5",

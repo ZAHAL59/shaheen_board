@@ -34,10 +34,11 @@ if (!fs.existsSync(USERS_FILE)) {
     ],
     students: [
       { id: "student1", username: "alice", password: "alice123", name: "Alice Johnson", batch: "batch1", email: "alice@example.com" },
-      { id: "student2", username: "bob", password: "bob123", name: "Bob Smith", batch: "batch1", email: "bob@example.com" },
-      { id: "student3", username: "carol", password: "carol123", name: "Carol Davis", batch: "batch1", email: "carol@example.com" },
-      { id: "student4", username: "dave", password: "dave123", name: "Dave Wilson", batch: "batch2", email: "dave@example.com" },
-      { id: "student5", username: "eve", password: "eve123", name: "Eve Brown", batch: "batch2", email: "eve@example.com" }
+      { id: "student2", username: "zahal", password: "zahal123", name: "zahal", batch: "batch1", email: "zahal@example.com" },
+      { id: "student3", username: "shalima", password: "shalima123", name: "Shalima", batch: "batch1", email: "shalima@example.com" },
+      { id: "student4", username: "zeba", password: "zeba123", name: "zeba", batch: "batch1", email: "zeba@example.com" },
+      { id: "student5", username: "roshni", password: "roshni123", name: "Roshni", batch: "batch2", email: "roshni@example.com" },
+      { id: "student6", username: "eve", password: "eve123", name: "Eve Brown", batch: "batch2", email: "eve@example.com" }
     ]
   };
   fs.writeFileSync(USERS_FILE, JSON.stringify(initialUsers, null, 2));
@@ -58,7 +59,7 @@ function readUsers() {
 
 // Batch data (for display)
 const batches = {
-  "batch1": { name: "Morning Batch (CS101)", students: ["alice", "bob", "carol"] },
+  "batch1": { name: "Morning Batch (CS101)", students: ["zahal", "shalima", "zeba"] },
   "batch2": { name: "Afternoon Batch (CS102)", students: ["dave", "eve"] },
   "batch3": { name: "Evening Batch (CS103)", students: [] }
 };
