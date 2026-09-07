@@ -59,9 +59,9 @@ function readUsers() {
 
 // Batch data (for display)
 const batches = {
-  "batch1": { name: "Morning Batch (CS101)", students: ["zahal", "shalima", "zeba"] },
-  "batch2": { name: "Afternoon Batch (CS102)", students: ["dave", "eve"] },
-  "batch3": { name: "Evening Batch (CS103)", students: [] }
+  "batch1": { name: "IPUC JEE", students: ["zahal", "shalima", "zeba"] },
+  "batch2": { name: "IPUC NEET", students: ["dave", "eve"] },
+  "batch3": { name: "IPUC RISING STAR", students: [] }
 };
 
 // ---------- API Endpoints ----------
