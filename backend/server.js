@@ -29,11 +29,11 @@ if (!fs.existsSync(NOTES_FILE)) fs.writeFileSync(NOTES_FILE, JSON.stringify([]))
 if (!fs.existsSync(USERS_FILE)) {
   const initialUsers = {
     teachers: [
-      { id: "teacher1", username: "teacher1", password: "pass123", name: "Prof. Smith", batches: ["batch1", "batch2"] },
+      { id: "teacher1", username: "teacher1", password: "pass123", name: "Prof. Smith", batches: ["IPUC NEET", "batch2"] },
       { id: "teacher2", username: "teacher2", password: "pass456", name: "Dr. Johnson", batches: ["batch2", "batch3"] }
     ],
     students: [
-      { id: "student1", username: "alice", password: "alice123", name: "Alice Johnson", batch: "batch1", email: "alice@example.com" },
+      { id: "student1", username: "alice", password: "alice123", name: "Alice Johnson", batch: "IPUC NEET", email: "alice@example.com" },
       { id: "student2", username: "zahal", password: "zahal123", name: "zahal", batch: "batch1", email: "zahal@example.com" },
       { id: "student3", username: "shalima", password: "shalima123", name: "Shalima", batch: "batch1", email: "shalima@example.com" },
       { id: "student4", username: "zeba", password: "zeba123", name: "zeba", batch: "batch1", email: "zeba@example.com" },
@@ -60,7 +60,7 @@ function readUsers() {
 // Batch data (for display)
 const batches = {
   "batch1": { name: "IPUC JEE", students: ["zahal", "shalima", "zeba"] },
-  "batch2": { name: "IPUC NEET", students: ["dave", "eve"] },
+  "batch2": { name: "IPUC NEET", students: ["zahal","dave", "eve"] },
   "batch3": { name: "IPUC RISING STAR", students: [] }
 };
 
